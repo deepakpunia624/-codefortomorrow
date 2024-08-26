@@ -1,16 +1,16 @@
-const categorySchema = require("../models/categorySchema/categoryCollection");
+const Category = require("../models/categorySchema/categoryCollection");
 
 module.exports = {
   createCategory: async (req, res) => {
     try {
       const { categoryName } = req.body;
-      const category = new categorySchema({
-        categoryName,
-      });
-      await category.save();
+
+      const category = await Category.create({ categoryName });
+
       res.status(201).json({
         success: true,
         message: "Category created successfully",
+        category: category,
       });
     } catch (err) {
       res.status(500).json({
@@ -19,13 +19,13 @@ module.exports = {
       });
     }
   },
-
   getAllCategories: async (req, res) => {
     try {
-      const categories = await categorySchema.find().exec();
+      const categories = await Category.findAll();
+
       res.status(200).json({
         success: true,
-        message: "Category retrived successfully",
+        message: "Categories retrieved successfully",
         categories: categories,
       });
     } catch (err) {
@@ -38,20 +38,25 @@ module.exports = {
 
   categoryUpdate: async (req, res) => {
     const id = req.params.id;
+    const { categoryName } = req.body;
+
     try {
-      const data = await categorySchema.findByIdAndUpdate(id, req.body);
-      if (!data) {
-        res.status(402).json({
+      const category = await Category.findOne({ where: { id } });
+
+      if (!category) {
+        return res.status(404).json({
           success: false,
           message: "Category not found",
         });
-      } else {
-        res.status(201).json({
-          success: true,
-          message: "Category updated successfully",
-          categories: data,
-        });
       }
+
+      const updatedCategory = await category.update({ categoryName });
+
+      res.status(200).json({
+        success: true,
+        message: "Category updated successfully",
+        category: updatedCategory,
+      });
     } catch (err) {
       res.status(500).json({
         success: false,
@@ -62,19 +67,23 @@ module.exports = {
 
   categoryDelete: async (req, res) => {
     const id = req.params.id;
+
     try {
-      const data = await categorySchema.findByIdAndDelete(id);
-      if (!data) {
-        res.status(402).json({
+      const deletedRows = await Category.destroy({
+        where: { id },
+      });
+
+      if (deletedRows === 0) {
+        return res.status(404).json({
           success: false,
           message: "Category not found",
         });
-      } else {
-        res.status(201).json({
-          success: true,
-          message: "Category deleted successfully",
-        });
       }
+
+      res.status(200).json({
+        success: true,
+        message: "Category deleted successfully",
+      });
     } catch (err) {
       res.status(500).json({
         success: false,

@@ -1,7 +1,15 @@
-const mongoose =require("mongoose")
+const { Sequelize } = require('sequelize');
 
-mongoose.connect('mongodb://127.0.0.1:27017/testdb').then(()=>{
-    console.log("connected")
-}).catch(()=>{
-    console.log("not connected")
-})
+const sequelize = new Sequelize('task', 'postgres', 'Password_123', {
+  host: 'localhost',
+  dialect: 'postgres',
+});
+
+// sequelize.sync()
+//   .then(() => {
+//     console.log('Database & tables created!');
+//   })
+//   .catch(err => console.error('Unable to connect to the database:', err));
+
+
+module.exports = { sequelize };
